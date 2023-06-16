@@ -6,7 +6,7 @@ import os
 import io
 import errno
 
-from waitress.server import create_server
+from waitress.server import create_server, TcpWSGIServer, MultiSocketServer
 from time import sleep
 
 from api import api_bp
@@ -64,8 +64,11 @@ class Server:
 
     def start(self):
         try:
-            logging.info(f'BAZARR is started and waiting for request on http://{self.server.effective_host}:'
-                         f'{self.server.effective_port}')
+            if isinstance(self.server, TcpWSGIServer):
+                logging.info(f'BAZARR is started and waiting for request on http://{self.server.effective_host}:'
+                             f'{self.server.effective_port}')
+            elif isinstance(self.server, MultiSocketServer):
+                logging.info(f'BAZARR is started and waiting for request on {self.server.effective_listen}')
             try:
                 self.server.run()
             except Exception:
